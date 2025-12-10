@@ -4,7 +4,13 @@
 <dict>
 <key>NSLocationWhenInUseUsageDescription</key>
 <string>RuckIt uses your location to track your hiking and rucking routes.</string>
+
 <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string>RuckIt tracks your route in the background so you don’t lose data during long rucks.</string>
+
+<key>UIBackgroundModes</key>
+<array>
+    <string>location</string>
+</array>
 </dict>
 </plist>

@@ -9,19 +9,25 @@ import SwiftUI
 struct StatCard: View {
     let title: String
     let value: String
+    let icon: String
     
     var body: some View {
-        VStack {
-            Text(title)
-                .font(.caption)
-                .foregroundColor(.secondary)
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundStyle(.blue)
+            
             Text(value)
                 .font(.title3)
-                .fontWeight(.medium)
+                .fontWeight(.bold)
+            
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
-        .background(Color.gray.opacity(0.1))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .padding()
+        .background(Color.secondary.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }

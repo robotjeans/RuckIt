@@ -14,8 +14,10 @@ struct Activity: Identifiable, Codable, Equatable, Hashable {
     var endTime: Date?
     var distance: Double
     var elevationGain: Double
-    var locationPoints: [LocationPoint] 
+    var locationPoints: [LocationPoint]
     var type: ActivityType
+    var ruckWeight: Double? // kg
+    var caloriesBurned: Double?
 
     var duration: TimeInterval {
         guard let endTime = endTime else { return 0 }
@@ -23,6 +25,3 @@ struct Activity: Identifiable, Codable, Equatable, Hashable {
     }
 }
 
-enum ActivityType: String, Codable, CaseIterable, Equatable, Hashable {
-    case hike, ruck
-}

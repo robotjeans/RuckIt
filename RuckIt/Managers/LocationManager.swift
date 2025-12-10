@@ -7,6 +7,7 @@
 import Foundation
 import CoreLocation
 import Observation
+import UIKit
 
 @Observable
 final class LocationManager: NSObject, CLLocationManagerDelegate {
@@ -20,74 +21,72 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
         CLLocationManager.locationServicesEnabled()
     }
     
+    // Computed property for easier checking
+    var isAuthorized: Bool {
+        authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways
+    }
+    
+    var isDenied: Bool {
+        authorizationStatus == .denied || authorizationStatus == .restricted
+    }
+    
     // Latest location (for UI preview, map centering, etc.)
-    var lastLocation: CLLocation? = nil
+    var lastLocation: CLLocation?
     
     // Background task support
     private var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
-    
-    // MARK: - Initialization
-    
+        
     private override init() {
         super.init()
         
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.distanceFilter = 3.0 // meters – balances battery & accuracy
-        locationManager.activityType = .fitness // Optimized for walking/running
-        
-        // Request authorization
-        requestAuthorization()
+        locationManager.distanceFilter = 3.0
+        locationManager.activityType = .fitness
     }
-    
-    // MARK: - Public API
-    
+        
     func requestAuthorization() {
         guard isLocationAvailable else { return }
-        
-        switch locationManager.authorizationStatus {
-        case .notDetermined:
-            locationManager.requestWhenInUseAuthorization()
-        case .authorizedWhenInUse:
-            // Optional: Request "Always" if you want background tracking
-            // locationManager.requestAlwaysAuthorization()
-            break
-        default:
-            break
-        }
+        locationManager.requestWhenInUseAuthorization()
     }
     
     func startUpdatingLocation() {
         guard isLocationAvailable else { return }
         
-        let status = locationManager.authorizationStatus
-        if status == .authorizedWhenInUse || status == .authorizedAlways {
-            // Start background task to prevent suspension
+        // Check if already authorized
+        if isAuthorized {
             startBackgroundTask()
+            locationManager.allowsBackgroundLocationUpdates = true
+            locationManager.showsBackgroundLocationIndicator = true
             locationManager.startUpdatingLocation()
-        } else {
+        } else if authorizationStatus == .notDetermined {
             requestAuthorization()
         }
     }
     
     func stopUpdatingLocation() {
         locationManager.stopUpdatingLocation()
+        locationManager.allowsBackgroundLocationUpdates = false
         endBackgroundTask()
     }
-    
-    // MARK: - CLLocationManagerDelegate
-    
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        authorizationStatus = status
         
-        switch status {
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        authorizationStatus = manager.authorizationStatus
+        
+        switch authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
-            // Auto-start if recording was pending (optional)
-            break
+            print("✅ Location authorized")
+            if ActivityManager.shared.isRecording {
+                startUpdatingLocation()
+            }
+            
         case .denied, .restricted:
-            // Notify user or disable recording
-            break
-        default:
+            print("❌ Location access denied")
+            
+        case .notDetermined:
+            print("⏳ Location authorization pending")
+            
+        @unknown default:
             break
         }
     }
@@ -95,7 +94,6 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
         
-        // Ignore old or inaccurate points
         let now = Date()
         let age = now.timeIntervalSince(location.timestamp)
         if age > 10.0 {
@@ -105,13 +103,10 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
         
         if location.horizontalAccuracy < 0 || location.horizontalAccuracy > 65 {
             print("⚠️ Low accuracy location: \(location.horizontalAccuracy)m")
-            // You may still accept it, but consider filtering
         }
         
-        // Update last known location
         lastLocation = location
         
-        // Pass to ActivityManager if recording
         if ActivityManager.shared.isRecording {
             ActivityManager.shared.addLocation(location)
         }
@@ -119,15 +114,11 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("📍 LocationManager error: \(error.localizedDescription)")
-        // Optionally notify user or retry
     }
-    
-    // MARK: - Background Task Management
-    
+        
     private func startBackgroundTask() {
-        endBackgroundTask() // Clean up any existing task
+        endBackgroundTask()
         backgroundTaskID = UIApplication.shared.beginBackgroundTask { [weak self] in
-            // Expired – stop location to avoid crash
             self?.stopUpdatingLocation()
         }
     }
