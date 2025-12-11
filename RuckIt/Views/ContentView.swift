@@ -7,13 +7,12 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var activityViewModel = ActivityViewModel()
+    @Environment(ActivityManager.self) private var activityManager
     @State private var selectedTab = 0
     @State private var showPreRecordingSheet = false
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            // Home Tab
             NavigationStack {
                 HomeView()
                     .navigationDestination(for: Activity.self) { activity in
@@ -25,14 +24,12 @@ struct ContentView: View {
             }
             .tag(0)
             
-            // Record Tab (Center - Shows sheet)
             Color.clear
                 .tabItem {
                     Label("Record", systemImage: "plus.circle.fill")
                 }
                 .tag(1)
             
-            // History Tab
             NavigationStack {
                 HistoryListView()
                     .navigationDestination(for: Activity.self) { activity in
@@ -44,10 +41,6 @@ struct ContentView: View {
             }
             .tag(2)
         }
-        .environment(ActivityManager.shared)
-        .environment(LocationManager.shared)
-        .environment(activityViewModel)
-        .environment(UserProfile.shared)
         .onChange(of: selectedTab) { oldValue, newValue in
             if newValue == 1 {
                 showPreRecordingSheet = true
@@ -58,15 +51,12 @@ struct ContentView: View {
             PreRecordingSetupView()
         }
         .fullScreenCover(isPresented: Binding(
-            get: { ActivityManager.shared.isRecording },
+            get: { activityManager.isRecording },
             set: { _ in }
         )) {
             NavigationStack {
                 RecordActivityView()
             }
-        }
-        .onAppear {
-            activityViewModel.load()
         }
     }
 }

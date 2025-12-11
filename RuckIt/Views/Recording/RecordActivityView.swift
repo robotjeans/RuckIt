@@ -26,12 +26,12 @@ struct RecordActivityView: View {
             // Live Metrics
             VStack(spacing: 12) {
                 HStack {
-                    StatCard(title: "Time", value: formattedDuration(elapsedTime))
-                    StatCard(title: "Distance", value: distanceString)
+                    StatCard(title: "Time", value: formattedDuration(elapsedTime), icon: "clock")
+                    StatCard(title: "Distance", value: distanceString, icon: "figure.walk")
                 }
                 HStack {
-                    StatCard(title: "Pace", value: paceString)
-                    StatCard(title: "Elev", value: elevationString)
+                    StatCard(title: "Pace", value: paceString, icon: "gauge.with.dots.needle.bottom.50percent")
+                    StatCard(title: "Elev", value: elevationString, icon: "mountain.2.fill")
                 }
             }
             .padding(.horizontal)
@@ -114,8 +114,6 @@ struct RecordActivityView: View {
         }
     }
 
-    // MARK: - Timer
-    
     private func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
             if let start = currentActivity?.startTime, !activityManager.isPaused {
@@ -128,8 +126,6 @@ struct RecordActivityView: View {
         timer?.invalidate()
         timer = nil
     }
-
-    // MARK: - Formatters
 
     private func formattedDuration(_ timeInterval: TimeInterval) -> String {
         let hours = Int(timeInterval) / 3600

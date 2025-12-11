@@ -8,9 +8,11 @@ import SwiftUI
 
 struct PreRecordingSetupView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(UserProfile.self) private var userProfile
     @Environment(ActivityManager.self) private var activityManager
     @Environment(LocationManager.self) private var locationManager
+    
+    // Access UserProfile directly since it's a singleton
+    private var userProfile: UserProfile { UserProfile.shared }
     
     @State private var ruckWeight: Double = 0
     @State private var userWeight: Double = 0

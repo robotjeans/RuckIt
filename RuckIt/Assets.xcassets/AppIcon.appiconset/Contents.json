@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "67b2e11b-7025-4b09-bdfe-af5f49c6c47d.png",
+      "filename" : "Neon Backpack with Mountain Icon.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -13,6 +13,7 @@
           "value" : "dark"
         }
       ],
+      "filename" : "Neon Backpack with Mountain Icon 1.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -24,6 +25,7 @@
           "value" : "tinted"
         }
       ],
+      "filename" : "Neon Backpack with Mountain Icon 2.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"

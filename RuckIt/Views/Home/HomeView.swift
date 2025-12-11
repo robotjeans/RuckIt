@@ -60,8 +60,7 @@ struct HomeView: View {
             // Start Button
             Button(action: {
                 if locationManager.isAuthorized {
-                    activityManager.startNewActivity(name: "Morning Ruck", type: .ruck)
-                    locationManager.startUpdatingLocation()
+                    // Recording handled by tab bar
                 } else {
                     showPermissionSheet = true
                 }
@@ -105,9 +104,7 @@ struct HomeView: View {
             }
         }
         .sheet(isPresented: $showPermissionSheet) {
-            if let permissionView = LocationPermissionView.self as? any View.Type {
-                AnyView(permissionView.init())
-            }
+            LocationPermissionView()
         }
         .onAppear {
             if locationManager.authorizationStatus == .notDetermined {
@@ -117,40 +114,3 @@ struct HomeView: View {
     }
 }
 
-struct LocationPermissionBanner: View {
-    var body: some View {
-        HStack {
-            Image(systemName: "location.slash.fill")
-                .foregroundStyle(.red)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Location Access Denied")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                Text("Enable in Settings to track activities")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            
-            Spacer()
-            
-            Button {
-                if let url = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(url)
-                }
-            } label: {
-                Text("Settings")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.blue)
-                    .foregroundStyle(.white)
-                    .clipShape(Capsule())
-            }
-        }
-        .padding()
-        .background(Color.red.opacity(0.1))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-}
